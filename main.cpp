@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
    * 	[3] "8-bit Greyscale 640 x 480 80 fps"
    *
    */
-  const char* devPath = "/dev/video4";
+  const char* devPath = "/dev/ocam";
 
   Withrobot::Camera camera(devPath);
 
@@ -180,7 +180,7 @@ int main(int argc, char* argv[]) {
 
     cv::cvtColor(srcImg, colorImg, cv::COLOR_BayerGB2BGR);
     /* Show image */
-    cv::imshow(windowName.c_str(), colorImg);
+    //cv::imshow(windowName.c_str(), colorImg);
 
     //(1) jpeg compression
     std::vector<uchar> buff;  // buffer for coding
