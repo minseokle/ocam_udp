@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
 
   /* bayer RBG 640 x 480 80 fps */
   camera.set_format(640, 480,
-                    Withrobot::fourcc_to_pixformat('G', 'B', 'G', 'R'), 1, 30);
+                  Withrobot::fourcc_to_pixformat('G','R','B','G'), 1, 100);
 
   /* USB 2.0 */
   /* bayer RBG 1280 x 720 30 fps */
@@ -116,9 +116,20 @@ int main(int argc, char* argv[]) {
    */
   int brightness = camera.get_control("Gain");
   int exposure = camera.get_control("Exposure (Absolute)");
+  int wb = camera.get_control("White Balance Blue Component");
+  int wr = camera.get_control("White Balance Red Component");
+
+  std::cout<<brightness<<" ,"<<exposure<<" ,"<<wb<<" ,"<<wr<<std::endl;
 
   camera.set_control("Gain", brightness);
   camera.set_control("Exposure (Absolute)", exposure);
+
+  camera.set_control("Gain", 150);
+  camera.set_control("Exposure (Absolute)",100);
+  camera.set_control("White Balance Blue Component", 250);
+  camera.set_control("White Balance Red Component", 150);
+
+  camera.set_control("Exposure, Auto", 0x1);
 
   /*
    * Start streaming
@@ -164,6 +175,7 @@ int main(int argc, char* argv[]) {
    * Main loop
    */
   bool quit = false;
+  int frame_cnt=0;
   while (!quit) {
     /* Copy a single frame(image) from camera(oCam-1MGN). This is a blocking
      * function. */
@@ -177,6 +189,9 @@ int main(int argc, char* argv[]) {
       camera.start();
       continue;
     }
+    frame_cnt++;
+    if(frame_cnt==10){
+       frame_cnt=0;
 
     cv::cvtColor(srcImg, colorImg, cv::COLOR_BayerGB2BGR);
     /* Show image */
@@ -192,49 +207,17 @@ int main(int argc, char* argv[]) {
     cv::imencode(".jpg", colorImg, buff, param);
     //std::cout<<buff.size()<<std::endl;
     if(buff.size()>65507){
-	    continue;
+      printf("delay1");
+    	    continue;
     }
     while ((sentBytes = sendto(client_socket, (const char *)buff.data(), buff.size(), 0,
                               (struct sockaddr*)&serverAddress,
                               sizeof(serverAddress)) )== -1)
-      ;
+      printf("delay2");
+}
     //std::cout << sentBytes << " : send\n";
-    char key = cv::waitKey(33);
+    char key = cv::waitKey(1);
 
-    /* Keyboard options */
-    switch (key) {
-      /* When press the 'q' key then quit. */
-      case 'q':
-        quit = true;
-        break;
-
-      /* When press the '[' key then decrease the exposure time. */
-      case '[':
-        exposure = camera.get_control("Exposure (Absolute)");
-        camera.set_control("Exposure (Absolute)", --exposure);
-        break;
-
-        /* When press the ']' key then increase the exposure time. */
-      case ']':
-        exposure = camera.get_control("Exposure (Absolute)");
-        camera.set_control("Exposure (Absolute)", ++exposure);
-        break;
-
-        /* When press the '-' key then decrease the brightness. */
-      case '-':
-        exposure = camera.get_control("Gain");
-        camera.set_control("Gain", --brightness);
-        break;
-
-        /* When press the '=' key then increase the brightness. */
-      case '=':
-        exposure = camera.get_control("Gain");
-        camera.set_control("Gain", ++brightness);
-        break;
-
-      default:
-        break;
-    }
   }
 
   cv::destroyAllWindows();
