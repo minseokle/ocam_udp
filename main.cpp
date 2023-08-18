@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
 
   /* bayer RBG 640 x 480 80 fps */
   camera.set_format(640, 480,
-                    Withrobot::fourcc_to_pixformat('G', 'B', 'G', 'R'), 1, 80);
+                    Withrobot::fourcc_to_pixformat('G', 'B', 'G', 'R'), 1, 30);
 
   /* USB 2.0 */
   /* bayer RBG 1280 x 720 30 fps */
@@ -190,12 +190,15 @@ int main(int argc, char* argv[]) {
     param[1] = 90;  // default(95) 0-100
 
     cv::imencode(".jpg", colorImg, buff, param);
-    std::cout<<buff.size()<<std::endl;
+    //std::cout<<buff.size()<<std::endl;
+    if(buff.size()>65507){
+	    continue;
+    }
     while ((sentBytes = sendto(client_socket, (const char *)buff.data(), buff.size(), 0,
                               (struct sockaddr*)&serverAddress,
                               sizeof(serverAddress)) )== -1)
       ;
-    std::cout << sentBytes << " : send\n";
+    //std::cout << sentBytes << " : send\n";
     char key = cv::waitKey(33);
 
     /* Keyboard options */
