@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
 
   /* bayer RBG 640 x 480 80 fps */
   camera.set_format(640, 480,
-                  Withrobot::fourcc_to_pixformat('G','R','B','G'), 1, 100);
+                    Withrobot::fourcc_to_pixformat('G', 'R', 'B', 'G'), 1, 100);
 
   /* USB 2.0 */
   /* bayer RBG 1280 x 720 30 fps */
@@ -119,13 +119,14 @@ int main(int argc, char* argv[]) {
   int wb = camera.get_control("White Balance Blue Component");
   int wr = camera.get_control("White Balance Red Component");
 
-  std::cout<<brightness<<" ,"<<exposure<<" ,"<<wb<<" ,"<<wr<<std::endl;
+  std::cout << brightness << " ," << exposure << " ," << wb << " ," << wr
+            << std::endl;
 
   camera.set_control("Gain", brightness);
   camera.set_control("Exposure (Absolute)", exposure);
 
   camera.set_control("Gain", 150);
-  camera.set_control("Exposure (Absolute)",100);
+  camera.set_control("Exposure (Absolute)", 100);
   camera.set_control("White Balance Blue Component", 250);
   camera.set_control("White Balance Red Component", 150);
 
@@ -175,7 +176,7 @@ int main(int argc, char* argv[]) {
    * Main loop
    */
   bool quit = false;
-  int frame_cnt=0;
+  int frame_cnt = 0;
   while (!quit) {
     /* Copy a single frame(image) from camera(oCam-1MGN). This is a blocking
      * function. */
@@ -190,39 +191,43 @@ int main(int argc, char* argv[]) {
       continue;
     }
     frame_cnt++;
-    if(frame_cnt==10){
-       frame_cnt=0;
+    if (frame_cnt == 10) {
+      frame_cnt = 0;
 
-    cv::cvtColor(srcImg, colorImg, cv::COLOR_BayerGB2BGR);
-    cv::Mat lowImg=colorImg(cv::Rect(0,0,640,320));
-    cv::Mat topImg=colorImg(cv::Rect(0,320,640,160));
-    /* Show image */
-    //cv::imshow(windowName.c_str(), colorImg);
+      cv::cvtColor(srcImg, colorImg, cv::COLOR_BayerGB2BGR);
+      cv::resize(colorImg, colorImg, cv::Size(320, 240));
+      // cv::Mat lowImg = colorImg(cv::Rect(0, 0, 640, 320));
+      // cv::Mat topImg = colorImg(cv::Rect(0, 320, 640, 160));
+      /* Show image */
+      // cv::imshow(windowName.c_str(), colorImg);
 
-    //(1) jpeg compression
-    std::vector<uchar> buff;  // buffer for coding
-    std::vector<int> param(2);
+      //(1) jpeg compression
+      std::vector<uchar> buff;  // buffer for coding
+      std::vector<int> param(2);
 
-    param[0] = cv::IMWRITE_JPEG_QUALITY;
-    param[1] = 92;  // default(95) 0-100
+      param[0] = cv::IMWRITE_JPEG_QUALITY;
+      param[1] = 92;  // default(95) 0-100
 
-    cv::imencode(".jpg", lowImg, buff, param);
-    //std::cout<<buff.size()<<std::endl;
-    if(buff.size()<65507){
-       while ((sentBytes = sendto(client_socket, (const char *)buff.data(), buff.size(), 0,
-                              (struct sockaddr*)&serverAddress,
-                              sizeof(serverAddress)) )== -1);
-    }
-    
-    cv::imencode(".jpg",topImg,buff,param);
-    if(buff.size()<65507){
-	    while ((sentBytes = sendto(client_socket, (const char *)buff.data(), buff.size(), 0,
-                              (struct sockaddr*)&serverAddress,
-                              sizeof(serverAddress)) )== -1);
-    }
+      cv::imencode(".jpg", colorImg, buff, param);
+      // std::cout<<buff.size()<<std::endl;
+      if (buff.size() < 65507) {
+        while ((sentBytes =
+                    sendto(client_socket, (const char*)buff.data(), buff.size(),
+                           0, (struct sockaddr*)&serverAddress,
+                           sizeof(serverAddress))) == -1)
+          ;
+      }
+
+      // cv::imencode(".jpg", topImg, buff, param);
+      // if (buff.size() < 65507) {
+      //   while ((sentBytes =
+      //               sendto(client_socket, (const char*)buff.data(), buff.size(),
+      //                      0, (struct sockaddr*)&serverAddress,
+      //                      sizeof(serverAddress))) == -1)
+      //     ;
+      // }
     }
     char key = cv::waitKey(1);
-
   }
 
   cv::destroyAllWindows();
