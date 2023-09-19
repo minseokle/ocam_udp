@@ -191,7 +191,7 @@ int main(int argc, char* argv[]) {
       continue;
     }
     frame_cnt++;
-    if (frame_cnt == 10) {
+    if (frame_cnt == 5) {
       frame_cnt = 0;
 
       cv::cvtColor(srcImg, colorImg, cv::COLOR_BayerGB2BGR);
