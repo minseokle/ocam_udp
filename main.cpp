@@ -194,6 +194,8 @@ int main(int argc, char* argv[]) {
        frame_cnt=0;
 
     cv::cvtColor(srcImg, colorImg, cv::COLOR_BayerGB2BGR);
+    cv::Mat lowImg=colorImg(cv::Rect(0,0,640,320));
+    cv::Mat topImg=colorImg(cv::Rect(0,320,640,160));
     /* Show image */
     //cv::imshow(windowName.c_str(), colorImg);
 
@@ -202,20 +204,23 @@ int main(int argc, char* argv[]) {
     std::vector<int> param(2);
 
     param[0] = cv::IMWRITE_JPEG_QUALITY;
-    param[1] = 85;  // default(95) 0-100
+    param[1] = 92;  // default(95) 0-100
 
-    cv::imencode(".jpg", colorImg, buff, param);
+    cv::imencode(".jpg", lowImg, buff, param);
     //std::cout<<buff.size()<<std::endl;
-    if(buff.size()>65507){
-      printf("delay1");
-    	    continue;
-    }
-    while ((sentBytes = sendto(client_socket, (const char *)buff.data(), buff.size(), 0,
+    if(buff.size()<65507){
+       while ((sentBytes = sendto(client_socket, (const char *)buff.data(), buff.size(), 0,
                               (struct sockaddr*)&serverAddress,
-                              sizeof(serverAddress)) )== -1)
-      printf("delay2");
-}
-    //std::cout << sentBytes << " : send\n";
+                              sizeof(serverAddress)) )== -1);
+    }
+    
+    cv::imencode(".jpg",topImg,buff,param);
+    if(buff.size()<65507){
+	    while ((sentBytes = sendto(client_socket, (const char *)buff.data(), buff.size(), 0,
+                              (struct sockaddr*)&serverAddress,
+                              sizeof(serverAddress)) )== -1);
+    }
+    }
     char key = cv::waitKey(1);
 
   }
