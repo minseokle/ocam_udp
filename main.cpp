@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
 
   /* bayer RBG 640 x 480 80 fps */
   camera.set_format(640, 480,
-                    Withrobot::fourcc_to_pixformat('G', 'R', 'B', 'G'), 1, 100);
+                    Withrobot::fourcc_to_pixformat('G', 'R', 'B', 'G'), 1, 60);
 
   /* USB 2.0 */
   /* bayer RBG 1280 x 720 30 fps */
@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
   camera.set_control("Exposure (Absolute)", exposure);
 
   camera.set_control("Gain", 150);
-  camera.set_control("Exposure (Absolute)", 100);
+  camera.set_control("Exposure (Absolute)", 60);
   camera.set_control("White Balance Blue Component", 250);
   camera.set_control("White Balance Red Component", 150);
 
@@ -191,7 +191,7 @@ int main(int argc, char* argv[]) {
       continue;
     }
     frame_cnt++;
-    if (frame_cnt == 5) {
+    if ( 1) {
       frame_cnt = 0;
 
       cv::cvtColor(srcImg, colorImg, cv::COLOR_BayerGB2BGR);
